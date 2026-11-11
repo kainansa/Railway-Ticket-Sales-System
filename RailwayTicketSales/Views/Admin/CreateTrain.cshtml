@@ -1,0 +1,54 @@
+@model RailwayTicketSales.Models.Entities.Train
+@{
+    ViewData["Title"] = "Add New Train";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-railway-blue text-white py-3">
+                <h4 class="fw-bold mb-0">Add New Train</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="CreateTrain" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TrainNumber" class="form-label fw-semibold">Train Number (e.g. SE5, SE6) *</label>
+                        <input asp-for="TrainNumber" class="form-control" required />
+                        <span asp-validation-for="TrainNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TrainType" class="form-label fw-semibold">Train Type</label>
+                        <select asp-for="TrainType" class="form-select">
+                            <option value="Express">Express (High Quality)</option>
+                            <option value="Local">Local (All Stations)</option>
+                            <option value="HighSpeed">High-Speed Intercity</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TotalCapacity" class="form-label fw-semibold">Total Passenger Capacity</label>
+                        <input asp-for="TotalCapacity" class="form-control" type="number" value="80" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Status" class="form-label fw-semibold">Operational Status</label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="Active">Active</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Standby">Standby</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Trains" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-railway fw-bold px-4">Save Train</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

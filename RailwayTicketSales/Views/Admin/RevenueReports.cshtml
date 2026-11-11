@@ -1,0 +1,98 @@
+@model RailwayTicketSales.Models.ViewModels.RevenueReportViewModel
+@{
+    ViewData["Title"] = "Revenue Report";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-cash-stack me-2"></i>Revenue Analytics Report</h3>
+        <small class="text-muted">Route-by-route sales performance and net income</small>
+    </div>
+    <button onclick="window.print()" class="btn btn-outline-secondary">
+        <i class="bi bi-printer me-1"></i> Print Report
+    </button>
+</div>
+
+<!-- Date Filter -->
+<div class="card shadow-sm border-0 mb-4 p-3 bg-light no-print">
+    <form asp-action="RevenueReports" method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">From Date</label>
+            <input type="date" name="from" value="@Model.FromDate.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">To Date</label>
+            <input type="date" name="to" value="@Model.ToDate.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-railway w-100 fw-bold">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- Revenue Totals -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3">
+            <small class="text-muted fw-bold">TOTAL GROSS REVENUE</small>
+            <h3 class="fw-bold text-primary mb-0">@Model.TotalGrossRevenue.ToString("N0") VND</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3">
+            <small class="text-muted fw-bold">TOTAL REFUNDS DEDUCTED</small>
+            <h3 class="fw-bold text-danger mb-0">- @Model.TotalRefunds.ToString("N0") VND</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3 border-start border-success border-4">
+            <small class="text-muted fw-bold">TOTAL NET REVENUE</small>
+            <h3 class="fw-bold text-success mb-0">@Model.TotalNetRevenue.ToString("N0") VND</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Route Breakdown Table -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0">Route & Train Fleet Revenue Breakdown</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Route</th>
+                        <th>Train</th>
+                        <th>Tickets Sold</th>
+                        <th>Gross Revenue</th>
+                        <th>Refunds Processed</th>
+                        <th class="text-end pe-3">Net Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.RouteRevenues.Any())
+                    {
+                        foreach (var item in Model.RouteRevenues)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-railway-blue">@item.RouteName</td>
+                                <td>Train @item.TrainNumber</td>
+                                <td>@item.TicketsSold</td>
+                                <td>@item.GrossRevenue.ToString("N0") VND</td>
+                                <td class="text-danger">- @item.Refunds.ToString("N0") VND</td>
+                                <td class="text-end pe-3 fw-bold text-success">@item.NetRevenue.ToString("N0") VND</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No revenue recorded in this date range.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

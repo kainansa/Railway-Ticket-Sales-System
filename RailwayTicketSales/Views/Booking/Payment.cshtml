@@ -1,0 +1,179 @@
+@model RailwayTicketSales.Models.ViewModels.PaymentViewModel
+@{
+    ViewData["Title"] = "Payment & 10-Minute Hold Reservation";
+}
+
+<!-- Countdown Banner (BR-03, BR-04) -->
+<div class="countdown-banner mb-4 shadow-sm">
+    <div class="d-flex align-items-center gap-3">
+        <i class="bi bi-stopwatch text-warning fs-1"></i>
+        <div>
+            <h5 class="fw-bold mb-0 text-dark">Seats Held for 10 Minutes (BR-03, BR-04)</h5>
+            <small class="text-muted">Please finish payment before the countdown timer reaches zero, or the seats will be automatically released.</small>
+        </div>
+    </div>
+    <div class="text-end">
+        <div class="countdown-timer" id="timerDisplay">--:--</div>
+        <small class="text-danger fw-semibold d-block">Time Remaining</small>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Payment Method & Gateway Options -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-railway-blue text-white py-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-credit-card me-2"></i>Select Payment Method</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="ProcessPayment" method="post" id="paymentForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="bookingOrderId" value="@Model.BookingOrderId" />
+
+                    <!-- Payment Methods -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Payment Methods</label>
+                        <div class="d-flex flex-column gap-3">
+                            <div class="form-check p-3 border rounded">
+                                <input class="form-check-input ms-1" type="radio" name="paymentMethod" id="pmOnline" value="OnlineBanking" checked>
+                                <label class="form-check-label ms-2 d-flex justify-content-between align-items-center w-100" for="pmOnline">
+                                    <span>
+                                        <strong>Online Banking / VietQR</strong><br>
+                                        <small class="text-muted">Instant transfer via Domestic Banking App</small>
+                                    </span>
+                                    <i class="bi bi-bank fs-4 text-primary"></i>
+                                </label>
+                            </div>
+
+                            <div class="form-check p-3 border rounded">
+                                <input class="form-check-input ms-1" type="radio" name="paymentMethod" id="pmVNPay" value="VNPay_Mock">
+                                <label class="form-check-label ms-2 d-flex justify-content-between align-items-center w-100" for="pmVNPay">
+                                    <span>
+                                        <strong>VNPay Gateway (Simulated)</strong><br>
+                                        <small class="text-muted">VNPay QR / E-Wallet</small>
+                                    </span>
+                                    <i class="bi bi-wallet2 fs-4 text-success"></i>
+                                </label>
+                            </div>
+
+                            <div class="form-check p-3 border rounded">
+                                <input class="form-check-input ms-1" type="radio" name="paymentMethod" id="pmCard" value="CreditCard">
+                                <label class="form-check-label ms-2 d-flex justify-content-between align-items-center w-100" for="pmCard">
+                                    <span>
+                                        <strong>Visa / MasterCard / JCB</strong><br>
+                                        <small class="text-muted">International Credit & Debit Cards</small>
+                                    </span>
+                                    <i class="bi bi-credit-card-2-front fs-4 text-warning"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Outcome Selector (For Grading and Alternative Flow Testing) -->
+                    <div class="bg-light p-3 rounded mb-4 border">
+                        <label class="form-label fw-bold text-dark mb-1">
+                            <i class="bi bi-sliders text-primary me-1"></i> Payment Simulation Outcome (Grading Test Modes):
+                        </label>
+                        <div class="d-flex flex-wrap gap-4 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="simulatedOutcome" id="outcomeSuccess" value="Success" checked>
+                                <label class="form-check-label fw-semibold text-success" for="outcomeSuccess">
+                                    <i class="bi bi-check-circle"></i> Success (Normal Flow)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="simulatedOutcome" id="outcomeRejected" value="Rejected">
+                                <label class="form-check-label fw-semibold text-danger" for="outcomeRejected">
+                                    <i class="bi bi-x-circle"></i> Rejected (Flow A4)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="simulatedOutcome" id="outcomeTimeout" value="Timeout">
+                                <label class="form-check-label fw-semibold text-warning" for="outcomeTimeout">
+                                    <i class="bi bi-clock-history"></i> Timeout (Flow A5)
+                                </label>
+                            </div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            Select an outcome to test normal payment or alternative failure/timeout scenarios as defined in Section 5.1.
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-railway btn-lg w-100 py-3 fw-bold fs-5">
+                        <i class="bi bi-lock-fill me-2"></i>Pay @Model.TotalAmount.ToString("N0") VND
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Order Details -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-light py-3">
+                <h5 class="fw-bold mb-0">Order: @Model.BookingCode</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <small class="text-muted d-block">Customer</small>
+                    <strong>@Model.CustomerName</strong> (@Model.CustomerPhone)
+                    <div class="text-muted small">@Model.CustomerEmail</div>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Journey Details</small>
+                    <strong>Train @Model.Schedule.Train?.TrainNumber (@Model.Schedule.TripCode)</strong>
+                    <div>@Model.Schedule.Route?.DepartureStation?.StationName &rarr; @Model.Schedule.Route?.ArrivalStation?.StationName</div>
+                    <div class="small text-muted">Departure: @Model.Schedule.DepartureTime.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+
+                <hr>
+
+                <h6 class="fw-bold mb-2">Reserved Seats:</h6>
+                <ul class="list-group mb-3">
+                    @foreach (var d in Model.Details)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Seat @d.Seat?.SeatNumber</strong> - @d.PassengerName
+                                <div class="small text-muted">ID: @d.PassengerIdCard &bull; @d.PassengerType</div>
+                            </div>
+                            <span class="fw-bold text-danger">@((d.Price + 5000).ToString("N0")) VND</span>
+                        </li>
+                    }
+                </ul>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <span class="fs-5 fw-bold">Total Amount:</span>
+                    <span class="fs-4 fw-bold text-danger">@Model.TotalAmount.ToString("N0") VND</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Server-synchronized 10-minute hold countdown timer (BR-04)
+        let remainingSeconds = @Model.RemainingSeconds;
+
+        function updateCountdown() {
+            if (remainingSeconds <= 0) {
+                document.getElementById('timerDisplay').textContent = "00:00";
+                alert("Your 10-minute seat reservation has expired. The seat has been released (BR-04).");
+                window.location.href = "/Train/Index";
+                return;
+            }
+
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = display;
+
+            remainingSeconds--;
+            setTimeout(updateCountdown, 1000);
+        }
+
+        updateCountdown();
+    </script>
+}

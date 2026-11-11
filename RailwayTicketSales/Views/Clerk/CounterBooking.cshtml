@@ -1,0 +1,127 @@
+@model RailwayTicketSales.Models.ViewModels.ScheduleDetailsViewModel
+@{
+    ViewData["Title"] = "Counter Seat Selection";
+    var schedule = Model.Schedule;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-warning text-dark py-3 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-ticket-perforated me-2"></i>Counter Seat Selection</h4>
+            <small>Train @schedule.Train?.TrainNumber (@schedule.TripCode) &bull; @schedule.Route?.DepartureStation?.StationName &rarr; @schedule.Route?.ArrivalStation?.StationName</small>
+        </div>
+        <a asp-action="SearchTrains" class="btn btn-outline-dark btn-sm">&larr; Back to Trains</a>
+    </div>
+
+    <div class="card-body p-4">
+        <!-- Coach Navigation Tabs -->
+        <ul class="nav nav-pills mb-4" id="clerkCoachTabs" role="tablist">
+            @for (int cIndex = 0; cIndex < Model.Coaches.Count; cIndex++)
+            {
+                var coachVm = Model.Coaches[cIndex];
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link @(cIndex == 0 ? "active" : "") fw-bold px-3 py-2 me-2 mb-2" 
+                            id="tab-clerk-@coachVm.Coach.CoachId" 
+                            data-bs-toggle="pill" 
+                            data-bs-target="#clerk-coach-@coachVm.Coach.CoachId" 
+                            type="button" 
+                            role="tab">
+                        Coach @coachVm.Coach.CoachNumber (@coachVm.Coach.CoachType)
+                    </button>
+                </li>
+            }
+        </ul>
+
+        <div class="tab-content" id="clerkCoachTabsContent">
+            @for (int cIndex = 0; cIndex < Model.Coaches.Count; cIndex++)
+            {
+                var coachVm = Model.Coaches[cIndex];
+                <div class="tab-pane fade @(cIndex == 0 ? "show active" : "")" id="clerk-coach-@coachVm.Coach.CoachId" role="tabpanel">
+                    <div class="seat-map-container mb-4">
+                        <div class="border rounded p-4 bg-light mx-auto" style="max-width: 650px;">
+                            <div class="seat-grid">
+                                @foreach (var seat in coachVm.Seats)
+                                {
+                                    var seatClass = "seat-box";
+                                    if (!seat.IsAvailable) seatClass += " unavailable";
+
+                                    <div class="@seatClass" 
+                                         data-seat-id="@seat.SeatId" 
+                                         data-seat-num="@seat.SeatNumber" 
+                                         data-price="@seat.Price"
+                                         onclick="toggleSeat(this, @seat.SeatId, '@seat.SeatNumber', @seat.Price, @seat.IsAvailable.ToString().ToLower())">
+                                        <div class="fw-bold">@seat.SeatNumber</div>
+                                        <small class="d-block" style="font-size: 0.7rem;">@seat.SeatType</small>
+                                        <small class="text-danger fw-semibold" style="font-size: 0.72rem;">@seat.Price.ToString("N0")</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Selection Panel -->
+        <div class="card bg-white border shadow-sm p-4 mt-3">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="fw-bold mb-1">Counter Selected Seats: <span id="selectedCount" class="text-warning">0</span></h5>
+                    <div id="selectedSeatsText" class="text-muted small">None selected yet. Click on available seats above to choose.</div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <div class="fs-4 fw-bold text-danger mb-2" id="totalPrice">0 VND</div>
+                    <form asp-action="CounterPassengerInfo" method="get">
+                        <input type="hidden" name="scheduleId" value="@schedule.ScheduleId" />
+                        <input type="hidden" name="seatIds" id="seatIdsInput" />
+                        <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold" id="btnProceed" disabled>
+                            Enter Passenger Details &rarr;
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedSeats = [];
+
+        function toggleSeat(element, seatId, seatNumber, price, isAvailable) {
+            if (!isAvailable) {
+                alert('This seat is unavailable.');
+                return;
+            }
+
+            const index = selectedSeats.findIndex(s => s.id === seatId);
+            if (index >= 0) {
+                selectedSeats.splice(index, 1);
+                element.classList.remove('selected');
+            } else {
+                selectedSeats.push({ id: seatId, number: seatNumber, price: price });
+                element.classList.add('selected');
+            }
+
+            const countSpan = document.getElementById('selectedCount');
+            const summaryText = document.getElementById('selectedSeatsText');
+            const totalText = document.getElementById('totalPrice');
+            const seatIdsInput = document.getElementById('seatIdsInput');
+            const btnProceed = document.getElementById('btnProceed');
+
+            countSpan.textContent = selectedSeats.length;
+            if (selectedSeats.length === 0) {
+                summaryText.textContent = 'None selected yet.';
+                totalText.textContent = '0 VND';
+                seatIdsInput.value = '';
+                btnProceed.disabled = true;
+            } else {
+                summaryText.innerHTML = `<strong>Seats:</strong> ${selectedSeats.map(s => s.number).join(', ')}`;
+                const total = selectedSeats.reduce((acc, s) => acc + s.price, 0);
+                totalText.textContent = total.toLocaleString('en-US') + ' VND';
+                seatIdsInput.value = selectedSeats.map(s => s.id).join(',');
+                btnProceed.disabled = false;
+            }
+        }
+    </script>
+}

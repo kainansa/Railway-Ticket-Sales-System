@@ -1,0 +1,189 @@
+@model List<RailwayTicketSales.Models.Entities.BookingOrder>
+@{
+    ViewData["Title"] = "My Bookings & Tickets";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-ticket-detailed me-2"></i>My Bookings & Electronic Tickets</h3>
+        <small class="text-muted">Manage your railway reservations, tickets, changes and refunds</small>
+    </div>
+    <a asp-controller="Train" asp-action="Index" class="btn btn-railway fw-bold">
+        <i class="bi bi-plus-circle me-1"></i> Book New Ticket
+    </a>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="d-flex flex-column gap-4">
+        @foreach (var order in Model)
+        {
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center py-3">
+                    <div>
+                        <span class="fw-bold text-railway-blue me-3 fs-5">
+                            <i class="bi bi-receipt me-1"></i> Booking @order.BookingCode
+                        </span>
+                        <span class="text-muted small">Placed on @order.CreatedDateTime.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div>
+                        @switch (order.OrderStatus)
+                        {
+                            case OrderStatus.Completed:
+                                <span class="badge bg-success fs-6"><i class="bi bi-check-circle me-1"></i> Completed / Paid</span>
+                                break;
+                            case OrderStatus.AwaitingPayment:
+                            case OrderStatus.Pending:
+                                <span class="badge bg-warning text-dark fs-6"><i class="bi bi-clock-history me-1"></i> Awaiting Payment (10m Hold)</span>
+                                break;
+                            case OrderStatus.Expired:
+                                <span class="badge bg-secondary fs-6"><i class="bi bi-x-circle me-1"></i> Expired</span>
+                                break;
+                            case OrderStatus.Refunded:
+                                <span class="badge bg-info text-dark fs-6"><i class="bi bi-arrow-counterclockwise me-1"></i> Refunded</span>
+                                break;
+                            default:
+                                <span class="badge bg-secondary fs-6">@order.OrderStatus</span>
+                                break;
+                        }
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Customer</small>
+                            <strong>@order.CustomerName</strong> &bull; @order.CustomerPhone
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Payment Method</small>
+                            <strong>@order.PaymentMethod</strong>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <small class="text-muted d-block">Total Amount</small>
+                            <span class="fs-5 fw-bold text-danger">@order.TotalAmount.ToString("N0") VND</span>
+                        </div>
+                    </div>
+
+                    @if (order.OrderStatus == OrderStatus.AwaitingPayment && order.HoldExpiresAt > DateTime.UtcNow)
+                    {
+                        <div class="alert alert-warning d-flex justify-content-between align-items-center mb-3">
+                            <span><i class="bi bi-hourglass-split"></i> Seats temporarily reserved until <strong>@order.HoldExpiresAt?.ToString("HH:mm:ss")</strong></span>
+                            <a asp-controller="Booking" asp-action="Payment" asp-route-id="@order.BookingOrderId" class="btn btn-warning fw-bold btn-sm">
+                                Complete Payment &rarr;
+                            </a>
+                        </div>
+                    }
+
+                    <!-- Tickets in this booking -->
+                    <h6 class="fw-bold text-dark mt-3 mb-2">Tickets in this Order:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle border">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ticket Code</th>
+                                    <th>Passenger</th>
+                                    <th>Train & Journey</th>
+                                    <th>Coach & Seat</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (order.Tickets != null && order.Tickets.Any())
+                                {
+                                    foreach (var ticket in order.Tickets)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold text-railway-blue">@ticket.TicketCode</td>
+                                            <td>
+                                                <strong>@ticket.PassengerName</strong>
+                                                <div class="small text-muted">ID: @ticket.PassengerIdCard (@ticket.PassengerType)</div>
+                                            </td>
+                                            <td>
+                                                <div><strong>Train @ticket.Schedule?.Train?.TrainNumber</strong> (@ticket.Schedule?.TripCode)</div>
+                                                <small class="text-muted">
+                                                    @ticket.Schedule?.Route?.DepartureStation?.StationName &rarr; @ticket.Schedule?.Route?.ArrivalStation?.StationName
+                                                </small>
+                                                <div class="small text-primary">@ticket.Schedule?.DepartureTime.ToString("dd/MM/yyyy HH:mm")</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark border">
+                                                    Coach @ticket.Seat?.Coach?.CoachNumber &bull; Seat @ticket.Seat?.SeatNumber
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @switch (ticket.TicketStatus)
+                                                {
+                                                    case TicketStatus.ActivePaid:
+                                                        <span class="badge bg-success">Active / Paid</span>
+                                                        break;
+                                                    case TicketStatus.Cancelled:
+                                                        <span class="badge bg-danger">Cancelled</span>
+                                                        break;
+                                                    case TicketStatus.Refunded:
+                                                        <span class="badge bg-info text-dark">Refunded</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@ticket.TicketStatus</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td class="text-end">
+                                                @if (ticket.TicketStatus == TicketStatus.ActivePaid)
+                                                {
+                                                    <a asp-action="Details" asp-route-id="@ticket.TicketId" class="btn btn-outline-primary btn-sm me-1" title="View E-Ticket & QR">
+                                                        <i class="bi bi-qr-code"></i> E-Ticket
+                                                    </a>
+                                                    <a asp-action="Change" asp-route-id="@ticket.TicketId" class="btn btn-outline-warning btn-sm me-1" title="Change Journey / Seat">
+                                                        <i class="bi bi-arrow-repeat"></i> Change
+                                                    </a>
+                                                    <a asp-action="Cancel" asp-route-id="@ticket.TicketId" class="btn btn-outline-danger btn-sm" title="Cancel Ticket">
+                                                        <i class="bi bi-x-circle"></i> Cancel
+                                                    </a>
+                                                }
+                                                else if (ticket.TicketStatus == TicketStatus.Cancelled)
+                                                {
+                                                    <a asp-controller="Refund" asp-action="RequestRefund" asp-route-ticketId="@ticket.TicketId" class="btn btn-outline-success btn-sm">
+                                                        <i class="bi bi-cash"></i> Request Refund
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-action="Details" asp-route-id="@ticket.TicketId" class="btn btn-outline-secondary btn-sm">
+                                                        View Receipt
+                                                    </a>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">
+                                            No issued tickets yet. (Awaiting payment or reservation expired).
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm text-center p-5">
+        <div class="text-muted mb-3">
+            <i class="bi bi-ticket-perforated" style="font-size: 3.5rem;"></i>
+        </div>
+        <h4 class="fw-bold">No bookings found</h4>
+        <p class="text-muted">You haven't booked any railway tickets yet.</p>
+        <div>
+            <a asp-controller="Train" asp-action="Index" class="btn btn-railway">Search & Book Train Now</a>
+        </div>
+    </div>
+}

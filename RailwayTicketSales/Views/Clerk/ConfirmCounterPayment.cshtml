@@ -1,0 +1,69 @@
+@model RailwayTicketSales.Models.Entities.BookingOrder
+@{
+    ViewData["Title"] = "Confirm Counter Payment";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning text-dark py-3">
+                <h4 class="fw-bold mb-0"><i class="bi bi-cash-stack me-2"></i>Confirm Counter Payment & Issue Tickets (BR-05)</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info">
+                    Ticket Clerk confirmation immediately confirms the order, issues electronic tickets, and generates 2D QR codes for gate turnstile validation.
+                </div>
+
+                <div class="bg-light p-3 rounded mb-4 border">
+                    <div class="row g-2">
+                        <div class="col-sm-6"><strong>Booking Code:</strong> @Model.BookingCode</div>
+                        <div class="col-sm-6"><strong>Customer:</strong> @Model.CustomerName</div>
+                        <div class="col-sm-6"><strong>Phone:</strong> @Model.CustomerPhone</div>
+                        <div class="col-sm-6"><strong>Total Seats:</strong> @Model.BookingDetails.Count</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-2">Reserved Seats:</h6>
+                    <ul class="list-group">
+                        @foreach (var d in Model.BookingDetails)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Seat @d.Seat?.SeatNumber</strong> - @d.PassengerName (ID: @d.PassengerIdCard)
+                                </div>
+                                <span class="fw-bold text-danger">@((d.Price + 5000).ToString("N0")) VND</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-4 border">
+                    <span class="fs-5 fw-bold">Total Amount Received:</span>
+                    <span class="fs-3 fw-bold text-danger">@Model.TotalAmount.ToString("N0") VND</span>
+                </div>
+
+                <form asp-action="ProcessCounterPayment" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="bookingOrderId" value="@Model.BookingOrderId" />
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Payment Method Received:</label>
+                        <select name="paymentMethod" class="form-select form-select-lg">
+                            <option value="CashCounter" selected>Cash at Counter</option>
+                            <option value="CreditCard">Station POS Terminal (Card)</option>
+                            <option value="OnlineBanking">Counter QR Transfer</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success btn-lg fw-bold px-4">
+                            <i class="bi bi-printer me-1"></i> Confirm Payment & Issue Tickets
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

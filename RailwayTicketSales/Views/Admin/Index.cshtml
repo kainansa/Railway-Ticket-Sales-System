@@ -1,0 +1,168 @@
+@model List<RailwayTicketSales.Models.Entities.BookingOrder>
+@{
+    ViewData["Title"] = "Administrator Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-speedometer2 me-2"></i>Railway System Administration</h3>
+        <small class="text-muted">Master control panel &bull; Railway data, ticket configuration, users & revenue analytics</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="SystemMonitor" class="btn btn-outline-primary">
+            <i class="bi bi-activity me-1"></i> Live System Monitor
+        </a>
+        <a asp-action="BookingReports" class="btn btn-railway">
+            <i class="bi bi-graph-up me-1"></i> Reports
+        </a>
+    </div>
+</div>
+
+<!-- Metric Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-start border-primary border-4 p-3">
+            <small class="text-muted fw-bold">TOTAL REVENUE</small>
+            <h3 class="fw-bold text-danger mb-0">@(((decimal)ViewBag.TotalRevenue).ToString("N0")) VND</h3>
+            <small class="text-success"><i class="bi bi-check-circle"></i> Paid Completed Orders</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-start border-success border-4 p-3">
+            <small class="text-muted fw-bold">TOTAL TICKETS ISSUED</small>
+            <h3 class="fw-bold text-success mb-0">@ViewBag.TotalTickets</h3>
+            <small class="text-muted">Across all schedules</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-start border-warning border-4 p-3">
+            <small class="text-muted fw-bold">ACTIVE 10-MIN SEAT HOLDS</small>
+            <h3 class="fw-bold text-warning mb-0">@ViewBag.ActiveHolds</h3>
+            <small class="text-muted">Live reservations in progress</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 border-start border-info border-4 p-3">
+            <small class="text-muted fw-bold">REGISTERED USERS</small>
+            <h3 class="fw-bold text-info mb-0">@ViewBag.TotalUsers</h3>
+            <small class="text-muted">Passengers & Railway Staff</small>
+        </div>
+    </div>
+</div>
+
+<!-- Management Quick Navigation Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h5 class="fw-bold text-railway-blue mb-3"><i class="bi bi-train-front me-2"></i>Railway Data</h5>
+                <div class="list-group list-group-flush">
+                    <a asp-action="Trains" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-train-lightrail me-2"></i>Manage Trains</span>
+                        <span class="badge bg-primary rounded-pill">@ViewBag.TotalTrains</span>
+                    </a>
+                    <a asp-action="Stations" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-building me-2"></i>Manage Stations</span>
+                        <span class="badge bg-primary rounded-pill">@ViewBag.TotalStations</span>
+                    </a>
+                    <a asp-action="Routes" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-signpost me-2"></i>Manage Routes</span>
+                        <span class="badge bg-primary rounded-pill">@ViewBag.TotalRoutes</span>
+                    </a>
+                    <a asp-action="Schedules" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-calendar3 me-2"></i>Manage Schedules</span>
+                        <span class="badge bg-success rounded-pill">@ViewBag.ActiveSchedules Active</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h5 class="fw-bold text-railway-blue mb-3"><i class="bi bi-sliders me-2"></i>Ticket Configuration</h5>
+                <div class="list-group list-group-flush">
+                    <a asp-action="Coaches" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-grid me-2"></i>Manage Coaches & Seats</span>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                    <a asp-action="Fares" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-tag me-2"></i>Manage Fares & Multipliers</span>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                    <a asp-controller="Home" asp-action="RefundPolicy" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-shield-check me-2"></i>Refund & Penalty Rules</span>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h5 class="fw-bold text-railway-blue mb-3"><i class="bi bi-people me-2"></i>Users & Analytics</h5>
+                <div class="list-group list-group-flush">
+                    <a asp-action="Users" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-person-gear me-2"></i>User & Staff Accounts</span>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                    <a asp-action="BookingReports" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-file-earmark-bar-graph me-2"></i>Booking Analytics Report</span>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                    <a asp-action="RevenueReports" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-cash-stack me-2"></i>Route Revenue Report</span>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                    <a asp-action="SystemMonitor" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                        <span><i class="bi bi-activity me-2"></i>Live System Monitor</span>
+                        <i class="bi bi-chevron-right text-muted"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0">Recent System Bookings</h5>
+        <a asp-action="BookingReports" class="btn btn-outline-primary btn-sm">Full Report</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Code</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Payment Method</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var b in Model)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-railway-blue">@b.BookingCode</td>
+                                <td>@b.CustomerName</td>
+                                <td class="fw-bold text-danger">@b.TotalAmount.ToString("N0") VND</td>
+                                <td><span class="badge bg-secondary">@b.OrderStatus</span></td>
+                                <td>@b.PaymentMethod</td>
+                                <td>@b.CreatedDateTime.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

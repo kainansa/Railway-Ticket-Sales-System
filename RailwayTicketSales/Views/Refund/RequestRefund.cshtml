@@ -1,0 +1,100 @@
+@model RailwayTicketSales.Models.ViewModels.RefundCalculationResult
+@{
+    ViewData["Title"] = "Request Refund";
+    var ticket = ViewBag.Ticket as RailwayTicketSales.Models.Entities.Ticket;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-success text-white py-3">
+                <h4 class="fw-bold mb-0"><i class="bi bi-cash-coin me-2"></i>Process Ticket Refund (BR-09, BR-10)</h4>
+            </div>
+            <div class="card-body p-4">
+                @if (!Model.IsEligible)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-x-circle-fill me-2"></i>
+                        <strong>Refund Ineligible:</strong> @Model.PolicyDescription
+                    </div>
+                    <a asp-controller="Ticket" asp-action="MyBookings" class="btn btn-secondary">&larr; Return to My Bookings</a>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Refund will be returned automatically via the Payment Gateway to the originating payment account.
+                    </div>
+
+                    <!-- Ticket Details -->
+                    <div class="bg-light p-3 rounded mb-4 border">
+                        <h6 class="fw-bold text-dark mb-2">Ticket Information:</h6>
+                        <div class="row g-2">
+                            <div class="col-sm-6"><strong>Ticket Code:</strong> @ticket?.TicketCode</div>
+                            <div class="col-sm-6"><strong>Passenger:</strong> @ticket?.PassengerName</div>
+                            <div class="col-sm-6"><strong>Original Fare:</strong> @ticket?.TicketPrice.ToString("N0") VND</div>
+                            <div class="col-sm-6"><strong>Ticket Status:</strong> <span class="badge bg-secondary">@ticket?.TicketStatus</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Refund Breakdown -->
+                    <div class="card border mb-4">
+                        <div class="card-header bg-white fw-bold">
+                            <i class="bi bi-receipt me-1"></i> Refund Calculation Breakdown (BR-09)
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Ticket Price:</span>
+                                <strong>@Model.TicketPrice.ToString("N0") VND</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 text-danger">
+                                <span>Cancellation Penalty (@Model.FeePercentage%):</span>
+                                <strong>- @Model.CancellationFee.ToString("N0") VND</strong>
+                            </div>
+                            <div class="small text-muted mb-3">
+                                <em>@Model.PolicyDescription</em>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fs-5 fw-bold">Refund Amount to be Transferred:</span>
+                                <span class="fs-4 fw-bold text-success">@Model.RefundableAmount.ToString("N0") VND</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="ProcessRefund" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ticketId" value="@Model.TicketId" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Reason for Refund Request</label>
+                            <input type="text" name="reason" class="form-control" value="Passenger schedule changed" required />
+                        </div>
+
+                        <!-- Test Simulation Mode -->
+                        <div class="bg-light p-3 rounded mb-4 border">
+                            <label class="form-label fw-bold small text-muted">Gateway Simulation Outcome:</label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="simulatedOutcome" id="refSuccess" value="Success" checked>
+                                    <label class="form-check-label text-success fw-semibold" for="refSuccess">Success (Normal Flow)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="simulatedOutcome" id="refFail" value="Timeout">
+                                    <label class="form-check-label text-warning fw-semibold" for="refFail">Delay / Pending (Alternative Flow A2)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Ticket" asp-action="MyBookings" class="btn btn-outline-secondary">&larr; Back to Bookings</a>
+                            <button type="submit" class="btn btn-success fw-bold px-4">
+                                <i class="bi bi-check2-circle me-1"></i> Confirm & Execute Refund
+                            </button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

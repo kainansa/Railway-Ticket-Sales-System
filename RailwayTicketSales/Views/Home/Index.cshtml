@@ -1,0 +1,138 @@
+@model RailwayTicketSales.Models.ViewModels.TrainSearchViewModel
+@{
+    ViewData["Title"] = "Search Trains & Book Online";
+    var featuredSchedules = ViewBag.FeaturedSchedules as List<RailwayTicketSales.Models.Entities.Schedule>;
+}
+
+<!-- Hero Search Banner -->
+<div class="card border-0 shadow-sm mb-4 text-white overflow-hidden" style="background: linear-gradient(135deg, #0f4c81 0%, #1e3a8a 100%); border-radius: 12px;">
+    <div class="card-body p-4 p-md-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <span class="badge bg-warning text-dark px-3 py-2 mb-2 fw-bold text-uppercase">Official Railway Ticketing</span>
+                <h1 class="display-5 fw-bold mb-3">Fast, Reliable Train Ticket Booking</h1>
+                <p class="lead mb-4 text-light">
+                    Search schedules, select coaches & seats with a real-time 10-minute hold reservation, and receive instant electronic tickets with QR validation.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-check text-warning fs-4"></i>
+                        <span>Guaranteed Seat Hold</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-qr-code text-warning fs-4"></i>
+                        <span>Smart QR E-Tickets</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-arrow-counterclockwise text-warning fs-4"></i>
+                        <span>Easy Change & Refund</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Form Card -->
+            <div class="col-lg-6">
+                <div class="card bg-white text-dark shadow-lg border-0 rounded-3">
+                    <div class="card-header bg-white border-0 pt-4 px-4 pb-2">
+                        <h4 class="fw-bold text-railway-blue mb-0"><i class="bi bi-search me-2"></i>Find Train Journey</h4>
+                        <small class="text-muted">Enter departure, destination and travel date</small>
+                    </div>
+                    <div class="card-body p-4">
+                        <form asp-controller="Train" asp-action="Index" method="get">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold"><i class="bi bi-geo-alt text-primary"></i> Departure Station</label>
+                                    <select class="form-select" name="departureStationId" required>
+                                        <option value="">-- Select Departure --</option>
+                                        @if (Model.Stations != null)
+                                        {
+                                            foreach (var st in Model.Stations)
+                                            {
+                                                <option value="@st.StationId">@st.StationName (@st.StationCode)</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold"><i class="bi bi-geo text-danger"></i> Arrival Station</label>
+                                    <select class="form-select" name="arrivalStationId" required>
+                                        <option value="">-- Select Destination --</option>
+                                        @if (Model.Stations != null)
+                                        {
+                                            foreach (var st in Model.Stations)
+                                            {
+                                                <option value="@st.StationId">@st.StationName (@st.StationCode)</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold"><i class="bi bi-calendar-event text-success"></i> Travel Date</label>
+                                    <input type="date" class="form-control" name="travelDate" value="@Model.TravelDate.ToString("yyyy-MM-dd")" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                                </div>
+
+                                <div class="col-12 mt-4">
+                                    <button type="submit" class="btn btn-railway btn-lg w-100 fw-bold">
+                                        <i class="bi bi-search me-2"></i>Search Available Trains
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Upcoming Trips -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history text-railway-blue me-2"></i>Popular Upcoming Schedules</h3>
+        <a asp-controller="Train" asp-action="Index" class="btn btn-outline-primary btn-sm">View All Trains <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="row g-3">
+        @if (featuredSchedules != null && featuredSchedules.Any())
+        {
+            foreach (var s in featuredSchedules)
+            {
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary fs-6">Train @s.Train?.TrainNumber</span>
+                                <span class="badge bg-light text-dark border">@s.TripCode</span>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-1">
+                                @s.Route?.DepartureStation?.StationName &rarr; @s.Route?.ArrivalStation?.StationName
+                            </h5>
+                            <p class="text-muted small mb-2">@s.Route?.RouteName</p>
+                            <div class="bg-light p-2 rounded mb-3 small">
+                                <div class="d-flex justify-content-between">
+                                    <span><i class="bi bi-clock"></i> Departure:</span>
+                                    <strong>@s.DepartureTime.ToString("dd/MM/yyyy HH:mm")</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span><i class="bi bi-flag"></i> Arrival:</span>
+                                    <span>@s.ArrivalTime.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted d-block">Base Fare</small>
+                                    <span class="fs-5 fw-bold text-danger">@s.BasePrice.ToString("N0") VND</span>
+                                </div>
+                                <a asp-controller="Booking" asp-action="SelectSeat" asp-route-scheduleId="@s.ScheduleId" class="btn btn-railway btn-sm">
+                                    Select Seats <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

@@ -1,0 +1,75 @@
+@model List<RailwayTicketSales.Models.Entities.Coach>
+@{
+    ViewData["Title"] = "Manage Coaches & Carriages";
+    var trains = ViewBag.Trains as List<RailwayTicketSales.Models.Entities.Train>;
+    var selectedTrain = ViewBag.SelectedTrain as RailwayTicketSales.Models.Entities.Train;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-grid-3x3-gap me-2"></i>Coach & Carriage Configuration</h3>
+        <small class="text-muted">Manage coaches and seat inventory per train</small>
+    </div>
+    <a asp-action="CreateCoach" asp-route-trainId="@selectedTrain?.TrainId" class="btn btn-railway fw-bold">
+        <i class="bi bi-plus-circle me-1"></i> Add Coach to Train
+    </a>
+</div>
+
+<!-- Train Filter -->
+<div class="card shadow-sm border-0 mb-4 p-3 bg-light">
+    <form asp-action="Coaches" method="get" class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <select name="trainId" class="form-select" onchange="this.form.submit()">
+                <option value="">-- All Trains --</option>
+                @if (trains != null)
+                {
+                    foreach (var t in trains)
+                    {
+                        <option value="@t.TrainId" selected="@(selectedTrain?.TrainId == t.TrainId)">Train @t.TrainNumber (@t.TrainType)</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-secondary w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Train</th>
+                        <th>Coach No</th>
+                        <th>Coach Type</th>
+                        <th>Floors</th>
+                        <th>Seats</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        <tr>
+                            <td class="ps-3 fw-bold text-railway-blue">Train @c.Train?.TrainNumber</td>
+                            <td><span class="badge bg-secondary fs-6">Coach @c.CoachNumber</span></td>
+                            <td><span class="badge bg-primary">@c.CoachType</span></td>
+                            <td>@c.FloorCount Floor(s)</td>
+                            <td>
+                                <strong>@c.Seats.Count Seats</strong>
+                            </td>
+                            <td class="text-end pe-3">
+                                <a asp-action="Seats" asp-route-coachId="@c.CoachId" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-grid-3x3"></i> View Seats
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

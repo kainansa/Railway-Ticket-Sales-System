@@ -1,0 +1,114 @@
+@{
+    ViewData["Title"] = "Change Ticket";
+    var ticket = ViewBag.Ticket as RailwayTicketSales.Models.Entities.Ticket;
+    var alternatives = ViewBag.AlternativeSchedules as List<RailwayTicketSales.Models.Entities.Schedule>;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-warning text-dark py-3 d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold mb-0"><i class="bi bi-arrow-repeat me-2"></i>Change Ticket - @ticket?.TicketCode</h4>
+        <a asp-action="MyBookings" class="btn btn-outline-dark btn-sm">&larr; Back to My Bookings</a>
+    </div>
+
+    <div class="card-body p-4">
+        <!-- Current Ticket Summary -->
+        <div class="bg-light p-3 rounded mb-4 border">
+            <h6 class="fw-bold text-railway-blue mb-2">Current Ticket Information:</h6>
+            <div class="row g-2">
+                <div class="col-md-3"><strong>Passenger:</strong> @ticket?.PassengerName</div>
+                <div class="col-md-3"><strong>Train:</strong> @ticket?.Schedule?.Train?.TrainNumber (@ticket?.Schedule?.TripCode)</div>
+                <div class="col-md-3"><strong>Seat:</strong> Seat @ticket?.Seat?.SeatNumber (Coach @ticket?.Seat?.Coach?.CoachNumber)</div>
+                <div class="col-md-3"><strong>Departure:</strong> @ticket?.Schedule?.DepartureTime.ToString("dd/MM/yyyy HH:mm")</div>
+                <div class="col-md-12 text-muted small mt-1">
+                    Current Fare Paid: <span class="fw-bold text-danger">@ticket?.TicketPrice.ToString("N0") VND</span> (BR-07: Change allowed at least 4 hours before departure).
+                </div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mb-3"><i class="bi bi-calendar3 me-2"></i>Select an Alternative Schedule:</h5>
+
+        @if (alternatives != null && alternatives.Any())
+        {
+            <div class="list-group mb-4">
+                @foreach (var s in alternatives)
+                {
+                    <div class="list-group-item p-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <span class="badge bg-primary fs-6">Train @s.Train?.TrainNumber</span>
+                                <div class="fw-bold text-dark mt-1">@s.TripCode</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div><i class="bi bi-clock"></i> Departure: <strong>@s.DepartureTime.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                                <div class="text-muted small">@s.Route?.DepartureStation?.StationName &rarr; @s.Route?.ArrivalStation?.StationName</div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <span class="text-muted small d-block">Base Price</span>
+                                <strong class="text-danger">@s.BasePrice.ToString("N0") VND</strong>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <a asp-controller="Booking" asp-action="SelectSeat" asp-route-scheduleId="@s.ScheduleId" class="btn btn-outline-primary btn-sm mb-1" target="_blank">
+                                    <i class="bi bi-eye"></i> View Seats
+                                </a>
+                                <button type="button" class="btn btn-warning btn-sm fw-bold ms-1" onclick="openSeatModal(@ticket?.TicketId, @s.ScheduleId, '@s.TripCode')">
+                                    Select This Train &rarr;
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                No alternative upcoming schedules are currently available for this route.
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal for choosing seat on chosen alternative schedule -->
+<div class="modal fade" id="seatModal" tabindex="-1" aria-labelledby="seatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold" id="seatModalLabel">Confirm New Journey Selection</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="ReviewChange" method="get">
+                <div class="modal-body">
+                    <input type="hidden" name="ticketId" id="modalTicketId" />
+                    <input type="hidden" name="newScheduleId" id="modalScheduleId" />
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Selected Alternative Trip</label>
+                        <input type="text" id="modalTripCode" class="form-control fw-bold" readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Enter Desired New Seat ID or Pick Seat Number:</label>
+                        <input type="number" name="newSeatId" class="form-control" placeholder="e.g. 5" required min="1" />
+                        <small class="text-muted">Enter the Seat ID you wish to switch to on this alternative train.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning fw-bold">Calculate Fare Difference & Review &rarr;</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openSeatModal(ticketId, scheduleId, tripCode) {
+            document.getElementById('modalTicketId').value = ticketId;
+            document.getElementById('modalScheduleId').value = scheduleId;
+            document.getElementById('modalTripCode').value = tripCode;
+            const modal = new bootstrap.Modal(document.getElementById('seatModal'));
+            modal.show();
+        }
+    </script>
+}

@@ -1,0 +1,178 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f6f8fa;
+  color: #212529;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+.footer {
+  flex-shrink: 0;
+  background-color: #1e293b;
+  color: #cbd5e1;
+}
+
+/* Railway Theme Colors */
+.bg-railway-blue {
+  background-color: #0f4c81 !important;
+}
+.text-railway-blue {
+  color: #0f4c81 !important;
+}
+.btn-railway {
+  background-color: #0f4c81;
+  color: #ffffff;
+  border: none;
+}
+.btn-railway:hover {
+  background-color: #0b375d;
+  color: #ffffff;
+}
+
+/* Seat Selection Map */
+.seat-map-container {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.seat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.seat-box {
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 6px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f8fafc;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  user-select: none;
+}
+
+.seat-box:hover:not(.unavailable):not(.held) {
+  border-color: #0f4c81;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.seat-box.selected {
+  background-color: #0f4c81 !important;
+  color: #ffffff !important;
+  border-color: #0f4c81 !important;
+}
+
+.seat-box.unavailable {
+  background-color: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.seat-box.held {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+  color: #b45309;
+  cursor: not-allowed;
+}
+
+.seat-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  margin-right: 15px;
+}
+
+.seat-legend-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+}
+
+/* Electronic Ticket Card */
+.eticket-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 2px dashed #0f4c81;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 750px;
+  margin: 0 auto;
+}
+
+.eticket-header {
+  background: linear-gradient(135deg, #0f4c81, #1e3a8a);
+  color: #ffffff;
+  padding: 20px 24px;
+}
+
+.eticket-body {
+  padding: 24px;
+}
+
+.eticket-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 2px dashed #e2e8f0;
+  padding-left: 20px;
+}
+
+/* 10-Minute Hold Countdown Banner */
+.countdown-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.countdown-timer {
+  font-family: monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
+/* Print styling */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+  .navbar, .footer, .btn, .no-print {
+    display: none !important;
+  }
+  .eticket-card {
+    border: 2px solid #000000 !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
+  }
+}

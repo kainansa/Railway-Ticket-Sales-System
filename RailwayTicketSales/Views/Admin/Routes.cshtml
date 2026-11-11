@@ -1,0 +1,63 @@
+@model List<RailwayTicketSales.Models.Entities.Route>
+@{
+    ViewData["Title"] = "Manage Routes";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-signpost-split me-2"></i>Railway Routes</h3>
+        <small class="text-muted">Manage train routes, origin, destination and track distance</small>
+    </div>
+    <a asp-action="CreateRoute" class="btn btn-railway fw-bold">
+        <i class="bi bi-plus-circle me-1"></i> Add Route
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Code</th>
+                        <th>Route Name</th>
+                        <th>Departure Station</th>
+                        <th>Arrival Station</th>
+                        <th>Distance</th>
+                        <th>Active</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td class="ps-3"><span class="badge bg-secondary">@r.RouteCode</span></td>
+                            <td class="fw-bold text-railway-blue">@r.RouteName</td>
+                            <td>@r.DepartureStation?.StationName</td>
+                            <td>@r.ArrivalStation?.StationName</td>
+                            <td>@r.DistanceKm.ToString("N0") km</td>
+                            <td>
+                                @if (r.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Disabled</span>
+                                }
+                            </td>
+                            <td class="text-end pe-3">
+                                <a asp-action="EditRoute" asp-route-id="@r.RouteId" class="btn btn-outline-primary btn-sm me-1">Edit</a>
+                                <form asp-action="DeleteRoute" asp-route-id="@r.RouteId" method="post" class="d-inline" onsubmit="return confirm('Delete route?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

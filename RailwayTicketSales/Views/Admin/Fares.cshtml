@@ -1,0 +1,54 @@
+@model List<RailwayTicketSales.Models.Entities.Fare>
+@{
+    ViewData["Title"] = "Manage Fares";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-tag me-2"></i>Fare Configurations (BR-06)</h3>
+        <small class="text-muted">Route, coach type, seat type multiplier and surcharge matrix</small>
+    </div>
+    <a asp-action="CreateFare" class="btn btn-railway fw-bold">
+        <i class="bi bi-plus-circle me-1"></i> Add Fare Rule
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Route</th>
+                        <th>Coach Type</th>
+                        <th>Seat Type</th>
+                        <th>Fare Multiplier</th>
+                        <th>Additional Surcharge</th>
+                        <th>Effective Date</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in Model)
+                    {
+                        <tr>
+                            <td class="ps-3 fw-bold text-railway-blue">@f.Route?.RouteName</td>
+                            <td><span class="badge bg-secondary">@f.CoachType</span></td>
+                            <td><span class="badge bg-primary">@f.SeatType</span></td>
+                            <td class="fw-bold">&times; @f.Multiplier.ToString("0.00")</td>
+                            <td class="text-danger">+ @f.AdditionalPrice.ToString("N0") VND</td>
+                            <td>@f.EffectiveDate.ToString("dd/MM/yyyy")</td>
+                            <td class="text-end pe-3">
+                                <a asp-action="EditFare" asp-route-id="@f.FareId" class="btn btn-outline-primary btn-sm me-1">Edit</a>
+                                <form asp-action="DeleteFare" asp-route-id="@f.FareId" method="post" class="d-inline" onsubmit="return confirm('Delete this fare configuration?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

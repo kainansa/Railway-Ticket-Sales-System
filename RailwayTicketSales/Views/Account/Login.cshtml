@@ -1,0 +1,79 @@
+@model RailwayTicketSales.Models.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Log In";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow border-0 rounded-3">
+            <div class="card-header bg-railway-blue text-white text-center py-3">
+                <h4 class="fw-bold mb-0"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</h4>
+                <small>Railway Ticket Sales System</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Email" class="form-control" id="loginEmail" placeholder="name@example.com" autofocus />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input asp-for="Password" class="form-control" id="loginPassword" type="password" placeholder="Password" />
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" asp-for="RememberMe" />
+                        <label class="form-check-label" asp-for="RememberMe"></label>
+                    </div>
+
+                    <button type="submit" class="btn btn-railway w-100 py-2 fw-bold">Sign In</button>
+                </form>
+
+                <hr class="my-4">
+
+                <!-- 1-Click Demo Accounts for Fast Testing -->
+                <div class="bg-light p-3 rounded">
+                    <h6 class="fw-bold text-muted small mb-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick Demo Login Fill:</h6>
+                    <div class="d-flex flex-column gap-2">
+                        <button type="button" class="btn btn-outline-danger btn-sm text-start" onclick="fillLogin('admin@railway.com', 'Admin@123')">
+                            <strong>Administrator:</strong> admin@railway.com / Admin@123
+                        </button>
+                        <button type="button" class="btn btn-outline-info btn-sm text-start text-dark" onclick="fillLogin('clerk@railway.com', 'Clerk@123')">
+                            <strong>Ticket Clerk:</strong> clerk@railway.com / Clerk@123
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm text-start" onclick="fillLogin('passenger@railway.com', 'Passenger@123')">
+                            <strong>Passenger:</strong> passenger@railway.com / Passenger@123
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <span class="text-muted small">Don't have an account?</span>
+                    <a asp-action="Register" class="fw-semibold small ms-1">Register as a Passenger</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function fillLogin(email, password) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = password;
+        }
+    </script>
+}

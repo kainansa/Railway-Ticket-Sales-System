@@ -1,0 +1,74 @@
+@model RailwayTicketSales.Models.Entities.Coach
+@{
+    ViewData["Title"] = "Add Coach to Train";
+    var trains = ViewBag.Trains as List<RailwayTicketSales.Models.Entities.Train>;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-railway-blue text-white py-3">
+                <h4 class="fw-bold mb-0">Add Coach to Train</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="CreateCoach" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TrainId" class="form-label fw-semibold">Train Fleet *</label>
+                        <select asp-for="TrainId" class="form-select" required>
+                            <option value="">-- Choose Train --</option>
+                            @if (trains != null)
+                            {
+                                foreach (var t in trains)
+                                {
+                                    <option value="@t.TrainId">Train @t.TrainNumber (@t.TrainType)</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="CoachNumber" class="form-label fw-semibold">Coach Number *</label>
+                            <input asp-for="CoachNumber" class="form-control" type="number" min="1" value="1" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CoachType" class="form-label fw-semibold">Coach Type</label>
+                            <select asp-for="CoachType" class="form-select">
+                                <option value="SoftSeat">SoftSeat (Air-conditioned)</option>
+                                <option value="HardSeat">HardSeat (Standard)</option>
+                                <option value="SoftBerth">SoftBerth (4-Berth Sleeper)</option>
+                                <option value="HardBerth">HardBerth (6-Berth Sleeper)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="TotalSeats" class="form-label fw-semibold">Total Seats to Auto-Generate</label>
+                            <input asp-for="TotalSeats" class="form-control" type="number" min="4" max="80" value="28" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="FloorCount" class="form-label fw-semibold">Floor / Deck Count</label>
+                            <select asp-for="FloorCount" class="form-select">
+                                <option value="1">1 (Single Deck)</option>
+                                <option value="2">2 (Double Deck)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info small mb-4">
+                        <i class="bi bi-magic"></i> Individual seat records will be automatically created in the database for this coach upon saving.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Coaches" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-railway fw-bold px-4">Create Coach & Generate Seats</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

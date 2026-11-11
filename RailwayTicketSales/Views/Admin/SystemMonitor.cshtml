@@ -1,0 +1,156 @@
+@{
+    ViewData["Title"] = "System Monitor";
+    var activeHolds = ViewBag.ActiveHolds as List<RailwayTicketSales.Models.Entities.BookingOrder>;
+    var expiredHolds = ViewBag.ExpiredHolds as List<RailwayTicketSales.Models.Entities.BookingOrder>;
+    var recentLogs = ViewBag.RecentLogs as List<RailwayTicketSales.Models.Entities.NotificationLog>;
+    var recentTxns = ViewBag.RecentTransactions as List<RailwayTicketSales.Models.Entities.PaymentTransaction>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-activity me-2"></i>Live System Status & Diagnostics</h3>
+        <small class="text-muted">Real-time seat reservations, 10-minute hold expiration, payment transactions & notification delivery</small>
+    </div>
+    <a asp-action="SystemMonitor" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-arrow-clockwise"></i> Refresh Status
+    </a>
+</div>
+
+<!-- Active 10-Minute Holds (BR-03, BR-04) -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-warning text-dark py-3 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Active 10-Minute Seat Holds (BR-03, BR-04)</h5>
+        <span class="badge bg-dark">@(activeHolds?.Count ?? 0) Active</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Booking Code</th>
+                        <th>Customer</th>
+                        <th>Trip</th>
+                        <th>Held Seats</th>
+                        <th>Hold Expires At</th>
+                        <th>Time Remaining</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (activeHolds != null && activeHolds.Any())
+                    {
+                        foreach (var h in activeHolds)
+                        {
+                            var remaining = h.HoldExpiresAt.HasValue ? (int)(h.HoldExpiresAt.Value - DateTime.UtcNow).TotalSeconds : 0;
+                            var min = remaining / 60;
+                            var sec = remaining % 60;
+
+                            <tr>
+                                <td class="ps-3 fw-bold text-railway-blue">@h.BookingCode</td>
+                                <td>@h.CustomerName</td>
+                                <td>@(h.BookingDetails.FirstOrDefault()?.Schedule?.TripCode ?? "N/A")</td>
+                                <td>@string.Join(", ", h.BookingDetails.Select(d => d.Seat?.SeatNumber))</td>
+                                <td>@h.HoldExpiresAt?.ToString("HH:mm:ss")</td>
+                                <td>
+                                    <span class="badge bg-danger fs-6 font-monospace">@min:@(sec.ToString("D2"))</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-3">No pending seat reservations at the moment.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Notification Logs -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-envelope-paper me-2"></i>Email / SMS Notification Logs</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                    <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="ps-3">Type</th>
+                                <th>Recipient</th>
+                                <th>Status</th>
+                                <th>Sent Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (recentLogs != null)
+                            {
+                                foreach (var l in recentLogs)
+                                {
+                                    <tr>
+                                        <td class="ps-3 fw-bold text-primary">@l.NotificationType</td>
+                                        <td>@l.RecipientEmail</td>
+                                        <td><span class="badge bg-success">@l.DeliveryStatus</span></td>
+                                        <td>@l.SentDate.ToString("HH:mm:ss dd/MM")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Gateway Transactions -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-credit-card me-2"></i>Payment Gateway Transactions</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                    <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="ps-3">Txn Code</th>
+                                <th>Method</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (recentTxns != null)
+                            {
+                                foreach (var tx in recentTxns)
+                                {
+                                    <tr>
+                                        <td class="ps-3 font-monospace">@tx.TransactionCode</td>
+                                        <td>@tx.PaymentMethod</td>
+                                        <td class="fw-bold">@tx.Amount.ToString("N0")</td>
+                                        <td>
+                                            @if (tx.Status == PaymentStatus.Success)
+                                            {
+                                                <span class="badge bg-success">Success</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">@tx.Status</span>
+                                            }
+                                        </td>
+                                        <td>@tx.TransactionDate.ToString("HH:mm:ss dd/MM")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,73 @@
+@model RailwayTicketSales.Models.Entities.BookingOrder
+@{
+    ViewData["Title"] = "Booking Confirmed";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-8">
+        <div class="card shadow border-0 rounded-3 text-center mb-4">
+            <div class="card-body p-5">
+                <div class="text-success mb-3">
+                    <i class="bi bi-check-circle-fill" style="font-size: 4rem;"></i>
+                </div>
+                <h2 class="fw-bold text-success mb-2">Booking Confirmed & Paid!</h2>
+                <p class="lead text-muted mb-4">
+                    Your payment of <strong>@Model.TotalAmount.ToString("N0") VND</strong> has been processed successfully. Electronic tickets with QR codes have been issued and sent to your email.
+                </p>
+
+                <div class="bg-light p-4 rounded text-start mb-4">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Booking Reference</small>
+                            <strong class="fs-5 text-railway-blue">@Model.BookingCode</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Payment Method</small>
+                            <strong>@Model.PaymentMethod</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Customer Name</small>
+                            <strong>@Model.CustomerName</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Delivery Email / Phone</small>
+                            <span>@Model.CustomerEmail &bull; @Model.CustomerPhone</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issued Tickets List -->
+                <h5 class="fw-bold text-start text-dark mb-3">Issued Electronic Tickets (@Model.Tickets.Count):</h5>
+                <div class="list-group mb-4 text-start">
+                    @foreach (var ticket in Model.Tickets)
+                    {
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <h6 class="fw-bold text-railway-blue mb-1">
+                                    <i class="bi bi-ticket-perforated me-1"></i> @ticket.TicketCode
+                                </h6>
+                                <div class="small">
+                                    Passenger: <strong>@ticket.PassengerName</strong> (ID: @ticket.PassengerIdCard) &bull; Seat: <strong>@ticket.Seat?.SeatNumber</strong>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <a asp-controller="Ticket" asp-action="Details" asp-route-id="@ticket.TicketId" class="btn btn-railway btn-sm fw-bold">
+                                    <i class="bi bi-qr-code me-1"></i> View E-Ticket
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a asp-controller="Ticket" asp-action="MyBookings" class="btn btn-outline-secondary">
+                        <i class="bi bi-journal-text me-1"></i> Go to My Bookings
+                    </a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-railway">
+                        <i class="bi bi-house me-1"></i> Return to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

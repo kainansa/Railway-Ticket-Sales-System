@@ -1,0 +1,73 @@
+@model RailwayTicketSales.Models.Entities.Fare
+@{
+    ViewData["Title"] = "Add Fare Rule";
+    var routes = ViewBag.Routes as List<RailwayTicketSales.Models.Entities.Route>;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-railway-blue text-white py-3">
+                <h4 class="fw-bold mb-0">Add Fare Rule</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="CreateFare" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="RouteId" class="form-label fw-semibold">Railway Route *</label>
+                        <select asp-for="RouteId" class="form-select" required>
+                            <option value="">-- Choose Route --</option>
+                            @if (routes != null)
+                            {
+                                foreach (var r in routes)
+                                {
+                                    <option value="@r.RouteId">@r.RouteName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="CoachType" class="form-label fw-semibold">Coach Type</label>
+                            <select asp-for="CoachType" class="form-select">
+                                <option value="SoftSeat">SoftSeat</option>
+                                <option value="HardSeat">HardSeat</option>
+                                <option value="SoftBerth">SoftBerth</option>
+                                <option value="HardBerth">HardBerth</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SeatType" class="form-label fw-semibold">Seat Type</label>
+                            <select asp-for="SeatType" class="form-select">
+                                <option value="HardSeat">HardSeat</option>
+                                <option value="SoftSeat" selected>SoftSeat</option>
+                                <option value="HardBerth">HardBerth</option>
+                                <option value="SoftBerth">SoftBerth</option>
+                                <option value="VIP">VIP</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Multiplier" class="form-label fw-semibold">Fare Multiplier (e.g. 1.25)</label>
+                            <input asp-for="Multiplier" class="form-control" type="number" step="0.05" value="1.00" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="AdditionalPrice" class="form-label fw-semibold">Surcharge (VND)</label>
+                            <input asp-for="AdditionalPrice" class="form-control" type="number" step="1000" value="0" required />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Fares" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-railway fw-bold px-4">Save Fare</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

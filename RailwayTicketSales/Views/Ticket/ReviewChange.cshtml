@@ -1,0 +1,114 @@
+@{
+    ViewData["Title"] = "Review Ticket Change";
+    var ticket = ViewBag.Ticket as RailwayTicketSales.Models.Entities.Ticket;
+    var newSchedule = ViewBag.NewSchedule as RailwayTicketSales.Models.Entities.Schedule;
+    var newSeat = ViewBag.NewSeat as RailwayTicketSales.Models.Entities.Seat;
+    var calc = ViewBag.Calculation as RailwayTicketSales.Models.ViewModels.ChangeTicketCalculation;
+}
+
+<div class="row justify-content-center py-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-warning text-dark py-3">
+                <h4 class="fw-bold mb-0"><i class="bi bi-calculator me-2"></i>Review Ticket Change & Fare Calculation (BR-08)</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border">
+                            <div class="card-header fw-bold text-muted small">CURRENT TICKET</div>
+                            <div class="card-body">
+                                <h6 class="fw-bold text-railway-blue mb-1">@ticket?.TicketCode</h6>
+                                <div>Train @ticket?.Schedule?.Train?.TrainNumber (@ticket?.Schedule?.TripCode)</div>
+                                <div>Seat: <strong>@ticket?.Seat?.SeatNumber</strong></div>
+                                <div>Departure: @ticket?.Schedule?.DepartureTime.ToString("dd/MM/yyyy HH:mm")</div>
+                                <div class="mt-2 text-danger fw-bold">Paid: @calc?.OldTicketPrice.ToString("N0") VND</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-light border">
+                            <div class="card-header fw-bold text-muted small">NEW JOURNEY</div>
+                            <div class="card-body">
+                                <h6 class="fw-bold text-success mb-1">Trip: @newSchedule?.TripCode</h6>
+                                <div>Train @newSchedule?.Train?.TrainNumber</div>
+                                <div>Seat: <strong>@newSeat?.SeatNumber</strong></div>
+                                <div>Departure: @newSchedule?.DepartureTime.ToString("dd/MM/yyyy HH:mm")</div>
+                                <div class="mt-2 text-success fw-bold">New Fare: @calc?.NewTicketPrice.ToString("N0") VND</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fare Calculation Table -->
+                <div class="card border mb-4">
+                    <div class="card-header bg-white fw-bold">Fare Difference Breakdown (BR-08)</div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>New Journey Fare:</span>
+                            <strong>@calc?.NewTicketPrice.ToString("N0") VND</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Original Ticket Credit:</span>
+                            <span>- @calc?.OldTicketPrice.ToString("N0") VND</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Fare Difference:</span>
+                            <span>@calc?.FareDifference.ToString("N0") VND</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Administrative Exchange Fee:</span>
+                            <span>@calc?.ChangeFee.ToString("N0") VND</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-5 fw-bold">Total Additional Payable:</span>
+                            <span class="fs-4 fw-bold text-danger">@calc?.TotalPayable.ToString("N0") VND</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form asp-action="ConfirmChange" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ticketId" value="@ticket?.TicketId" />
+                    <input type="hidden" name="newScheduleId" value="@newSchedule?.ScheduleId" />
+                    <input type="hidden" name="newSeatId" value="@newSeat?.SeatId" />
+
+                    @if (calc != null && calc.TotalPayable > 0)
+                    {
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Payment Method for Additional Fee</label>
+                            <select name="paymentMethod" class="form-select">
+                                <option value="OnlineBanking">Online Banking / VietQR</option>
+                                <option value="VNPay_Mock">VNPay Mock Gateway</option>
+                                <option value="CreditCard">Credit / Debit Card</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-light p-3 rounded mb-4 border">
+                            <label class="form-label fw-bold small text-muted">Test Simulation Outcome:</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="simulatedOutcome" id="chgSuccess" value="Success" checked>
+                                    <label class="form-check-label text-success" for="chgSuccess">Success</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="simulatedOutcome" id="chgFail" value="Rejected">
+                                    <label class="form-check-label text-danger" for="chgFail">Rejected (A3: Original ticket preserved)</label>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Change" asp-route-id="@ticket?.TicketId" class="btn btn-outline-secondary">&larr; Back to Selection</a>
+                        <button type="submit" class="btn btn-warning btn-lg fw-bold px-4">
+                            Confirm & Complete Change <i class="bi bi-check-circle ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

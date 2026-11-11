@@ -1,0 +1,45 @@
+@model RailwayTicketSales.Models.Entities.Station
+@{
+    ViewData["Title"] = "Edit Station";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-railway-blue text-white py-3">
+                <h4 class="fw-bold mb-0">Edit Station @Model.StationName</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="EditStation" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="StationId" />
+
+                    <div class="mb-3">
+                        <label asp-for="StationCode" class="form-label fw-semibold">Station Code</label>
+                        <input asp-for="StationCode" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="StationName" class="form-label fw-semibold">Station Name</label>
+                        <input asp-for="StationName" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="City" class="form-label fw-semibold">City</label>
+                        <input asp-for="City" class="form-control" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Address" class="form-label fw-semibold">Address</label>
+                        <input asp-for="Address" class="form-control" />
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Stations" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-railway fw-bold px-4">Update Station</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,113 @@
+@model List<RailwayTicketSales.Models.Entities.BookingOrder>
+@{
+    ViewData["Title"] = "Manage Bookings";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-journal-text me-2"></i>Booking Management</h3>
+        <small class="text-muted">Look up customer reservations, payment status and counter actions</small>
+    </div>
+    <a asp-action="SearchTrains" class="btn btn-warning fw-bold">
+        <i class="bi bi-plus-circle me-1"></i> New Counter Booking
+    </a>
+</div>
+
+<!-- Search Bar -->
+<div class="card shadow-sm border-0 mb-4 p-3">
+    <form asp-action="ManageBookings" method="get" class="row g-2 align-items-center">
+        <div class="col-md-10">
+            <input type="text" name="searchKeyword" value="@ViewBag.SearchKeyword" class="form-control" placeholder="Search by booking code, customer name, phone number, or ID card..." />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-railway w-100 fw-bold">Search</button>
+        </div>
+    </form>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Code</th>
+                        <th>Customer</th>
+                        <th>Type</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Date & Time</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var b in Model)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-railway-blue">@b.BookingCode</td>
+                                <td>
+                                    <strong>@b.CustomerName</strong>
+                                    <div class="small text-muted">@b.CustomerPhone &bull; @b.CustomerEmail</div>
+                                </td>
+                                <td>
+                                    @if (b.IsCounterBooking)
+                                    {
+                                        <span class="badge bg-info text-dark">Counter</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Online</span>
+                                    }
+                                </td>
+                                <td class="fw-bold text-danger">@b.TotalAmount.ToString("N0") VND</td>
+                                <td>
+                                    @switch (b.OrderStatus)
+                                    {
+                                        case OrderStatus.Completed:
+                                            <span class="badge bg-success">Paid / Completed</span>
+                                            break;
+                                        case OrderStatus.AwaitingPayment:
+                                            <span class="badge bg-warning text-dark">Awaiting Payment</span>
+                                            break;
+                                        case OrderStatus.Expired:
+                                            <span class="badge bg-secondary">Expired</span>
+                                            break;
+                                        case OrderStatus.Refunded:
+                                            <span class="badge bg-info text-dark">Refunded</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@b.OrderStatus</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@b.CreatedDateTime.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-end pe-3">
+                                    @if (b.OrderStatus == OrderStatus.AwaitingPayment)
+                                    {
+                                        <a asp-action="ConfirmCounterPayment" asp-route-bookingOrderId="@b.BookingOrderId" class="btn btn-warning btn-sm fw-bold">
+                                            Confirm Payment
+                                        </a>
+                                    }
+                                    else if (b.OrderStatus == OrderStatus.Completed)
+                                    {
+                                        <a asp-action="PrintCounterTickets" asp-route-bookingOrderId="@b.BookingOrderId" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-printer"></i> Tickets
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">No matching bookings found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

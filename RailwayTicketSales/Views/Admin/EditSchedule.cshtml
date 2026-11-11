@@ -1,0 +1,93 @@
+@model RailwayTicketSales.Models.Entities.Schedule
+@{
+    ViewData["Title"] = "Edit Schedule";
+    var trains = ViewBag.Trains as List<RailwayTicketSales.Models.Entities.Train>;
+    var routes = ViewBag.Routes as List<RailwayTicketSales.Models.Entities.Route>;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-railway-blue text-white py-3">
+                <h4 class="fw-bold mb-0">Edit Schedule @Model.TripCode</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="EditSchedule" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ScheduleId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TripCode" class="form-label fw-semibold">Trip Identifier Code</label>
+                        <input asp-for="TripCode" class="form-control" required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="TrainId" class="form-label fw-semibold">Assigned Train</label>
+                            <select asp-for="TrainId" class="form-select" required>
+                                @if (trains != null)
+                                {
+                                    foreach (var t in trains)
+                                    {
+                                        <option value="@t.TrainId" selected="@(t.TrainId == Model.TrainId)">Train @t.TrainNumber (@t.TrainType)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="RouteId" class="form-label fw-semibold">Route</label>
+                            <select asp-for="RouteId" class="form-select" required>
+                                @if (routes != null)
+                                {
+                                    foreach (var r in routes)
+                                    {
+                                        <option value="@r.RouteId" selected="@(r.RouteId == Model.RouteId)">@r.RouteName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="DepartureTime" class="form-label fw-semibold">Departure Date & Time</label>
+                            <input asp-for="DepartureTime" class="form-control" type="datetime-local" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="ArrivalTime" class="form-label fw-semibold">Arrival Date & Time</label>
+                            <input asp-for="ArrivalTime" class="form-control" type="datetime-local" required />
+                            <span asp-validation-for="ArrivalTime" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="BasePrice" class="form-label fw-semibold">Base Ticket Price (VND)</label>
+                            <input asp-for="BasePrice" class="form-control" type="number" step="1000" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Status" class="form-label fw-semibold">Trip Status</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="Scheduled" selected="@(Model.Status == TripStatus.Scheduled)">Scheduled</option>
+                                <option value="BookingOpen" selected="@(Model.Status == TripStatus.BookingOpen)">BookingOpen</option>
+                                <option value="SoldOut" selected="@(Model.Status == TripStatus.SoldOut)">SoldOut</option>
+                                <option value="BookingClosed" selected="@(Model.Status == TripStatus.BookingClosed)">BookingClosed</option>
+                                <option value="InTransit" selected="@(Model.Status == TripStatus.InTransit)">InTransit</option>
+                                <option value="Completed" selected="@(Model.Status == TripStatus.Completed)">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Schedules" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-railway fw-bold px-4">Update Schedule</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

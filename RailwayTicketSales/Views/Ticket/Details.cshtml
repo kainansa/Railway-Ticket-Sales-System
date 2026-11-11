@@ -1,0 +1,120 @@
+@model RailwayTicketSales.Models.Entities.Ticket
+@{
+    ViewData["Title"] = "Electronic Ticket - " + Model.TicketCode;
+    var qrImage = ViewBag.QrCodeImage as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <a asp-action="MyBookings" class="btn btn-outline-secondary">&larr; Back to My Bookings</a>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-success fw-bold">
+            <i class="bi bi-printer me-1"></i> Print E-Ticket
+        </button>
+        @if (Model.TicketStatus == TicketStatus.ActivePaid)
+        {
+            <a asp-action="Change" asp-route-id="@Model.TicketId" class="btn btn-outline-warning">
+                <i class="bi bi-arrow-repeat me-1"></i> Change
+            </a>
+            <a asp-action="Cancel" asp-route-id="@Model.TicketId" class="btn btn-outline-danger">
+                <i class="bi bi-x-circle me-1"></i> Cancel
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Electronic Ticket Card -->
+<div class="eticket-card shadow">
+    <div class="eticket-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-train-front fs-2 text-warning"></i>
+                <div>
+                    <h4 class="fw-bold mb-0">VIETNAM RAILWAYS</h4>
+                    <small class="text-light">ELECTRONIC BOARDING PASS & TICKET</small>
+                </div>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-warning text-dark px-3 py-2 fw-bold fs-6">@Model.TicketStatus</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="eticket-body">
+        <div class="row align-items-center">
+            <!-- Left Ticket Information -->
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Ticket Number</span>
+                    <h5 class="fw-bold text-railway-blue mb-0">@Model.TicketCode</h5>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <small class="text-muted d-block">Passenger Name</small>
+                        <h6 class="fw-bold mb-0">@Model.PassengerName</h6>
+                        <small class="text-muted">ID: @Model.PassengerIdCard (@Model.PassengerType)</small>
+                    </div>
+                    <div class="col-sm-6">
+                        <small class="text-muted d-block">Train & Journey</small>
+                        <h6 class="fw-bold mb-0">Train @Model.Schedule?.Train?.TrainNumber (@Model.Schedule?.TripCode)</h6>
+                        <small class="text-muted">@Model.Schedule?.Route?.RouteName</small>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3 bg-light p-3 rounded">
+                    <div class="col-sm-6">
+                        <small class="text-muted d-block">Departure Station & Time</small>
+                        <strong class="text-primary">@Model.Schedule?.Route?.DepartureStation?.StationName</strong>
+                        <div class="fw-bold fs-6">@Model.Schedule?.DepartureTime.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <small class="text-muted d-block">Arrival Station & Time</small>
+                        <strong class="text-primary">@Model.Schedule?.Route?.ArrivalStation?.StationName</strong>
+                        <div class="fw-bold fs-6">@Model.Schedule?.ArrivalTime.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-2">
+                    <div class="col-4">
+                        <small class="text-muted d-block">Coach / Carriage</small>
+                        <span class="badge bg-primary fs-6">Coach @Model.Seat?.Coach?.CoachNumber</span>
+                        <div class="small text-muted">@Model.Seat?.Coach?.CoachType</div>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted d-block">Seat Number</small>
+                        <span class="badge bg-warning text-dark fs-6">Seat @Model.Seat?.SeatNumber</span>
+                        <div class="small text-muted">Floor @Model.Seat?.Floor</div>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted d-block">Fare & Insurance</small>
+                        <strong class="text-danger">@((Model.TicketPrice + Model.InsuranceFee).ToString("N0")) VND</strong>
+                        <div class="small text-muted">Paid in full</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right QR Code Section -->
+            <div class="col-md-4 eticket-qr text-center">
+                @if (!string.IsNullOrEmpty(qrImage))
+                {
+                    <img src="@qrImage" alt="QR Code" class="img-fluid mb-2 border p-1 rounded" style="max-width: 170px;" />
+                }
+                else
+                {
+                    <div class="bg-light p-4 rounded mb-2 border text-muted">
+                        <i class="bi bi-qr-code fs-1"></i>
+                    </div>
+                }
+                <div class="fw-bold text-dark small">SCAN AT TICKET GATE</div>
+                <small class="text-muted" style="font-size: 0.7rem;">Secured Railway QR Code</small>
+                <div class="mt-2 text-muted" style="font-size: 0.65rem;">
+                    Issued: @Model.IssuedDate.ToString("dd/MM/yyyy HH:mm")
+                </div>
+            </div>
+        </div>
+
+        <div class="border-top pt-3 mt-3 text-muted small text-center">
+            Notice: Please arrive at the station at least 30 minutes before departure. Present this E-ticket and matching Citizen ID at the boarding turnstile gate.
+        </div>
+    </div>
+</div>

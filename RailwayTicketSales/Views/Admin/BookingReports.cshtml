@@ -1,0 +1,107 @@
+@model RailwayTicketSales.Models.ViewModels.BookingReportViewModel
+@{
+    ViewData["Title"] = "Booking Analytics Report";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-file-earmark-bar-graph me-2"></i>Booking Analytics Report</h3>
+        <small class="text-muted">Comprehensive breakdown of booking volumes, issuance, cancellations and revenue</small>
+    </div>
+    <button onclick="window.print()" class="btn btn-outline-secondary">
+        <i class="bi bi-printer me-1"></i> Print Report
+    </button>
+</div>
+
+<!-- Date Filter -->
+<div class="card shadow-sm border-0 mb-4 p-3 bg-light no-print">
+    <form asp-action="BookingReports" method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">From Date</label>
+            <input type="date" name="from" value="@Model.FromDate.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">To Date</label>
+            <input type="date" name="to" value="@Model.ToDate.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-railway w-100 fw-bold">Filter Report Data</button>
+        </div>
+    </form>
+</div>
+
+<!-- KPI Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3">
+            <small class="text-muted fw-bold">TOTAL BOOKINGS</small>
+            <h3 class="fw-bold text-primary mb-0">@Model.TotalBookings</h3>
+            <div class="small text-muted">@Model.CompletedBookings Completed &bull; @Model.ExpiredBookings Expired</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3">
+            <small class="text-muted fw-bold">TICKETS ISSUED</small>
+            <h3 class="fw-bold text-success mb-0">@Model.TotalTicketsIssued</h3>
+            <div class="small text-muted">@Model.TotalTicketsCancelled Cancelled &bull; @Model.TotalTicketsRefunded Refunded</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3">
+            <small class="text-muted fw-bold">GROSS BOOKING REVENUE</small>
+            <h3 class="fw-bold text-danger mb-0">@Model.TotalRevenue.ToString("N0") VND</h3>
+            <div class="small text-muted">Refunded: -@Model.TotalRefundedAmount.ToString("N0") VND</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3">
+            <small class="text-muted fw-bold">NET REVENUE</small>
+            <h3 class="fw-bold text-success mb-0">@Model.NetRevenue.ToString("N0") VND</h3>
+            <div class="small text-success"><i class="bi bi-graph-up-arrow"></i> Actual railway retained income</div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Booking Orders Table -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0">Booking Records in Period</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Code</th>
+                        <th>Customer</th>
+                        <th>Trip</th>
+                        <th>Tickets</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.RecentBookings)
+                    {
+                        var trip = b.BookingDetails.FirstOrDefault()?.Schedule?.TripCode ?? "N/A";
+
+                        <tr>
+                            <td class="ps-3 fw-bold text-railway-blue">@b.BookingCode</td>
+                            <td>@b.CustomerName</td>
+                            <td>@trip</td>
+                            <td>@b.Tickets.Count</td>
+                            <td class="fw-bold text-danger">@b.TotalAmount.ToString("N0") VND</td>
+                            <td>
+                                <span class="badge @(b.OrderStatus == OrderStatus.Completed ? "bg-success" : "bg-secondary")">
+                                    @b.OrderStatus
+                                </span>
+                            </td>
+                            <td>@b.CreatedDateTime.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

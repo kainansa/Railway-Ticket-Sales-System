@@ -1,0 +1,80 @@
+@model List<RailwayTicketSales.Models.Entities.ApplicationUser>
+@{
+    ViewData["Title"] = "Manage Users & Permissions";
+    var userRoles = ViewBag.UserRoles as Dictionary<string, string>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0"><i class="bi bi-people-fill me-2"></i>User Management & Permissions</h3>
+        <small class="text-muted">Manage passengers, ticket clerk staff and administrator accounts</small>
+    </div>
+    <a asp-action="CreateStaff" class="btn btn-railway fw-bold">
+        <i class="bi bi-person-plus-fill me-1"></i> Add Railway Staff
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Full Name</th>
+                        <th>Email / Username</th>
+                        <th>ID Card</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model)
+                    {
+                        var role = userRoles != null && userRoles.ContainsKey(u.Id) ? userRoles[u.Id] : "Passenger";
+
+                        <tr>
+                            <td class="ps-3 fw-bold">@u.FullName</td>
+                            <td>@u.Email</td>
+                            <td>@(u.IdCard ?? "N/A")</td>
+                            <td>@(u.PhoneNumber ?? "N/A")</td>
+                            <td>
+                                @switch (role)
+                                {
+                                    case "Administrator":
+                                        <span class="badge bg-danger">Administrator</span>
+                                        break;
+                                    case "TicketClerk":
+                                        <span class="badge bg-warning text-dark">Ticket Clerk</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-primary">Passenger</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (u.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Locked</span>
+                                }
+                            </td>
+                            <td class="text-end pe-3">
+                                <form asp-action="ToggleUserStatus" asp-route-id="@u.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm @(u.IsActive ? "btn-outline-danger" : "btn-outline-success")">
+                                        @(u.IsActive ? "Lock Account" : "Activate")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

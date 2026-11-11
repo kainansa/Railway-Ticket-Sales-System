@@ -1,0 +1,30 @@
+@model RailwayTicketSales.Models.Entities.Coach
+@{
+    ViewData["Title"] = "Seats in Coach " + Model.CoachNumber;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-railway-blue mb-0">
+            Coach @Model.CoachNumber (@Model.CoachType) - Train @Model.Train?.TrainNumber
+        </h3>
+        <small class="text-muted">Total @Model.Seats.Count Seats &bull; Floor Count: @Model.FloorCount</small>
+    </div>
+    <a asp-action="Coaches" asp-route-trainId="@Model.TrainId" class="btn btn-outline-secondary">&larr; Back to Coaches</a>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-light fw-bold">Seat Inventory Map</div>
+    <div class="card-body p-4">
+        <div class="seat-grid">
+            @foreach (var s in Model.Seats.OrderBy(st => st.SeatNumber))
+            {
+                <div class="seat-box text-center">
+                    <div class="fw-bold fs-6">@s.SeatNumber</div>
+                    <small class="text-muted d-block" style="font-size: 0.7rem;">@s.SeatType</small>
+                    <span class="badge bg-light text-dark border mt-1" style="font-size: 0.65rem;">Floor @s.Floor</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>

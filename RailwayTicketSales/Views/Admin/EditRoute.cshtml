@@ -1,0 +1,76 @@
+@model RailwayTicketSales.Models.Entities.Route
+@{
+    ViewData["Title"] = "Edit Route";
+    var stations = ViewBag.Stations as List<RailwayTicketSales.Models.Entities.Station>;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-railway-blue text-white py-3">
+                <h4 class="fw-bold mb-0">Edit Route @Model.RouteName</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="EditRoute" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="RouteId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="RouteCode" class="form-label fw-semibold">Route Code</label>
+                        <input asp-for="RouteCode" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="RouteName" class="form-label fw-semibold">Route Name</label>
+                        <input asp-for="RouteName" class="form-control" required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="DepartureStationId" class="form-label fw-semibold">Departure Station</label>
+                            <select asp-for="DepartureStationId" class="form-select" required>
+                                @if (stations != null)
+                                {
+                                    foreach (var s in stations)
+                                    {
+                                        <option value="@s.StationId" selected="@(s.StationId == Model.DepartureStationId)">@s.StationName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="ArrivalStationId" class="form-label fw-semibold">Arrival Station</label>
+                            <select asp-for="ArrivalStationId" class="form-select" required>
+                                @if (stations != null)
+                                {
+                                    foreach (var s in stations)
+                                    {
+                                        <option value="@s.StationId" selected="@(s.StationId == Model.ArrivalStationId)">@s.StationName</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="ArrivalStationId" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DistanceKm" class="form-label fw-semibold">Distance (km)</label>
+                        <input asp-for="DistanceKm" class="form-control" type="number" step="0.1" required />
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" asp-for="IsActive" />
+                        <label class="form-check-label" asp-for="IsActive">Route is Active</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Routes" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-railway fw-bold px-4">Update Route</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

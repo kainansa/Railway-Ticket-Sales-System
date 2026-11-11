@@ -1,0 +1,158 @@
+@model RailwayTicketSales.Models.ViewModels.CreateBookingRequest
+@{
+    ViewData["Title"] = "Enter Passenger Information";
+    var schedule = ViewBag.Schedule as RailwayTicketSales.Models.Entities.Schedule;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-railway-blue text-white py-3">
+        <h4 class="fw-bold mb-0"><i class="bi bi-person-lines-fill me-2"></i>Passenger & Contact Details (BR-01)</h4>
+        <small>Train @schedule?.Train?.TrainNumber (@schedule?.TripCode) &bull; @schedule?.Route?.DepartureStation?.StationName &rarr; @schedule?.Route?.ArrivalStation?.StationName</small>
+    </div>
+
+    <div class="card-body p-4">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ScheduleId" />
+
+            <div class="row g-4">
+                <!-- Left: Passenger Inputs -->
+                <div class="col-lg-8">
+                    <!-- Customer Contact Details -->
+                    <div class="card border mb-4">
+                        <div class="card-header bg-light fw-bold">
+                            <i class="bi bi-person-vcard text-primary me-1"></i> Ticket Buyer / Contact Details
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="CustomerName" class="form-label fw-semibold">Contact Full Name *</label>
+                                    <input asp-for="CustomerName" class="form-control" required />
+                                    <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="CustomerEmail" class="form-label fw-semibold">Email Address (for E-Ticket) *</label>
+                                    <input asp-for="CustomerEmail" class="form-control" type="email" required />
+                                    <span asp-validation-for="CustomerEmail" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="CustomerPhone" class="form-label fw-semibold">Phone Number *</label>
+                                    <input asp-for="CustomerPhone" class="form-control" required />
+                                    <span asp-validation-for="CustomerPhone" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="CustomerIdCard" class="form-label fw-semibold">Citizen ID / Passport *</label>
+                                    <input asp-for="CustomerIdCard" class="form-control" required />
+                                    <span asp-validation-for="CustomerIdCard" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Individual Passengers for each seat -->
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-people-fill text-primary me-2"></i>Passenger Details for Each Seat</h5>
+                    @for (int i = 0; i < Model.Passengers.Count; i++)
+                    {
+                        <div class="card border mb-3">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-railway-blue">
+                                    <i class="bi bi-ticket me-1"></i> Seat @Model.Passengers[i].SeatNumber (Coach @Model.Passengers[i].CoachNumber)
+                                </span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger fw-bold">
+                                    @Model.Passengers[i].Price.ToString("N0") VND
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <input type="hidden" asp-for="Passengers[i].SeatId" />
+                                <input type="hidden" asp-for="Passengers[i].SeatNumber" />
+                                <input type="hidden" asp-for="Passengers[i].CoachNumber" />
+                                <input type="hidden" asp-for="Passengers[i].Price" />
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Passenger Full Name *</label>
+                                        <input asp-for="Passengers[i].PassengerName" class="form-control" placeholder="As shown on ID card" required />
+                                        <span asp-validation-for="Passengers[i].PassengerName" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">ID / Passport / Birth Certificate *</label>
+                                        <input asp-for="Passengers[i].PassengerIdCard" class="form-control" placeholder="Citizen ID or Passport" required />
+                                        <span asp-validation-for="Passengers[i].PassengerIdCard" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Passenger Phone</label>
+                                        <input asp-for="Passengers[i].PassengerPhone" class="form-control" placeholder="Optional" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Passenger Type</label>
+                                        <select asp-for="Passengers[i].PassengerType" class="form-select">
+                                            <option value="Adult">Adult</option>
+                                            <option value="Child">Child (under 12)</option>
+                                            <option value="Student">Student</option>
+                                            <option value="Senior">Senior (over 60)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Right: Summary & Action -->
+                <div class="col-lg-4">
+                    <div class="card border shadow-sm sticky-top" style="top: 20px;">
+                        <div class="card-header bg-railway-blue text-white py-3">
+                            <h5 class="fw-bold mb-0">Booking Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Trip</small>
+                                <strong>@schedule?.TripCode</strong>
+                                <div>@schedule?.Route?.DepartureStation?.StationName &rarr; @schedule?.Route?.ArrivalStation?.StationName</div>
+                                <div class="small text-muted">@schedule?.DepartureTime.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span>Seats Selected:</span>
+                                <strong>@Model.Passengers.Count</strong>
+                            </div>
+
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span>Ticket Fares:</span>
+                                <span>@Model.Passengers.Sum(p => p.Price).ToString("N0") VND</span>
+                            </div>
+
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span>Passenger Insurance:</span>
+                                <span>@((Model.Passengers.Count * 5000).ToString("N0")) VND</span>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-4 d-flex justify-content-between align-items-center">
+                                <span class="fs-5 fw-bold">Total Fare:</span>
+                                <span class="fs-4 fw-bold text-danger">
+                                    @((Model.Passengers.Sum(p => p.Price) + (Model.Passengers.Count * 5000)).ToString("N0")) VND
+                                </span>
+                            </div>
+
+                            <div class="alert alert-warning small mb-3">
+                                <i class="bi bi-clock-history"></i> Upon clicking continue, your seats will be <strong>held for 10 minutes</strong> while you complete payment (BR-03, BR-04).
+                            </div>
+
+                            <button type="submit" class="btn btn-railway btn-lg w-100 fw-bold">
+                                Reserve Seats & Pay <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

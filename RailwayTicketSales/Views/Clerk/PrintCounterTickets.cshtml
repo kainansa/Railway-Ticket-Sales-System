@@ -1,0 +1,55 @@
+@model RailwayTicketSales.Models.Entities.BookingOrder
+@{
+    ViewData["Title"] = "Print Counter Tickets";
+    var qrImages = ViewBag.QrImages as Dictionary<int, string>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <a asp-action="Index" class="btn btn-outline-secondary">&larr; Back to Clerk Dashboard</a>
+    <button onclick="window.print()" class="btn btn-primary btn-lg fw-bold">
+        <i class="bi bi-printer me-2"></i> Print All Tickets
+    </button>
+</div>
+
+<div class="d-flex flex-column gap-4">
+    @foreach (var ticket in Model.Tickets)
+    {
+        var qrImg = qrImages != null && qrImages.ContainsKey(ticket.TicketId) ? qrImages[ticket.TicketId] : "";
+
+        <div class="eticket-card shadow-sm">
+            <div class="eticket-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="fw-bold mb-0">VIETNAM RAILWAYS - PASSENGER TICKET</h4>
+                        <small>Station Counter Issued &bull; Booking Ref: @Model.BookingCode</small>
+                    </div>
+                    <span class="badge bg-light text-dark fw-bold fs-6">@ticket.TicketStatus</span>
+                </div>
+            </div>
+
+            <div class="eticket-body">
+                <div class="row align-items-center">
+                    <div class="col-8">
+                        <div class="row g-2 mb-2">
+                            <div class="col-6"><strong>Ticket:</strong> @ticket.TicketCode</div>
+                            <div class="col-6"><strong>Passenger:</strong> @ticket.PassengerName (ID: @ticket.PassengerIdCard)</div>
+                            <div class="col-6"><strong>Train:</strong> @ticket.Schedule?.Train?.TrainNumber (@ticket.Schedule?.TripCode)</div>
+                            <div class="col-6"><strong>Route:</strong> @ticket.Schedule?.Route?.RouteName</div>
+                            <div class="col-6"><strong>Coach:</strong> @ticket.Seat?.Coach?.CoachNumber (@ticket.Seat?.Coach?.CoachType)</div>
+                            <div class="col-6"><strong>Seat:</strong> Seat @ticket.Seat?.SeatNumber (Floor @ticket.Seat?.Floor)</div>
+                            <div class="col-12"><strong>Departure:</strong> @ticket.Schedule?.DepartureTime.ToString("dd/MM/yyyy HH:mm")</div>
+                            <div class="col-12"><strong>Fare Paid:</strong> @((ticket.TicketPrice + ticket.InsuranceFee).ToString("N0")) VND</div>
+                        </div>
+                    </div>
+                    <div class="col-4 eticket-qr text-center">
+                        @if (!string.IsNullOrEmpty(qrImg))
+                        {
+                            <img src="@qrImg" alt="QR Code" class="img-fluid border p-1 rounded" style="max-width: 140px;" />
+                        }
+                        <small class="d-block mt-1 fw-bold text-muted" style="font-size: 0.7rem;">GATE BARCODE / QR</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
